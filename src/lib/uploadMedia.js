@@ -1,0 +1,51 @@
+import { supabase } from '@lib/supabase'
+
+const DEFAULT_BUCKET = 'site-images'
+const ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
+const MIME_BY_EXTENSION = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+}
+
+function getFileExtension(fileName = '') {
+  const parts = fileName.toLowerCase().split('.')
+  return parts.length > 1 ? parts.pop() : ''
+}
+
+function getContentType(file) {
+  if (file?.type && ALLOWED_MIME_TYPES.has(file.type)) return file.type
+  const ext = getFileExtension(file?.name)
+  return MIME_BY_EXTENSION[ext] ?? 'application/octet-stream'
+}
+
+function createFileId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+export async function uploadMedia(file, folder = 'general') {
+  if (!file) return ''
+
+  const contentType = getContentType(file)
+  if (!ALLOWED_MIME_TYPES.has(contentType)) {
+    throw new Error('Formato inválido. Use PNG, JPEG ou WEBP.')
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, '_')
+  const path = `${folder}/${createFileId()}-${safeName}`
+
+  const { error: uploadError } = await supabase.storage
+    .from(DEFAULT_BUCKET)
+    .upload(path, file, {
+      upsert: true,
+      cacheControl: '3600',
+      contentType,
+    })
+
+  if (uploadError) throw uploadError
+
+  const { data } = supabase.storage.from(DEFAULT_BUCKET).getPublicUrl(path)
+  return data.publicUrl
+}
