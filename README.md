@@ -1,57 +1,29 @@
-# Paróquia Nossa Senhora das Graças - Fase 5
+# Paróquia Nossa Senhora das Graças
 
-Projeto React + Vite + Supabase com site público, autenticação administrativa, CRUDs e estrutura inicial para produção.
-
-## Estrutura
-- `src/main.jsx` é a entrada do Vite.
-- `src/App.jsx` concentra as rotas públicas e administrativas.
-- `src/components`, `src/layouts`, `src/pages`, `src/hooks`, `src/lib` e `src/data` organizam a aplicação.
+Base institucional em React + Vite + Supabase para o site da paróquia e a área administrativa.
 
 ## Stack
-- React + Vite
+
+- React 18
+- Vite
 - React Router
-- Supabase Auth + Database + Storage
-- JWT gerenciado pelo Supabase
+- Supabase Auth / JWT
+- Supabase Postgres
 
-## Instalação
-```bash
-npm install
-cp .env.example .env
-npm run dev
-```
+## Como rodar
 
-## Build
-```bash
-npm run build
-npm run preview
-```
+1. Instale as dependências com `npm install`.
+2. Copie `.env.example` para `.env` e preencha `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
+3. Execute `npm run dev`.
 
-## Variáveis obrigatórias
-```env
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-```
+## Supabase
 
-## Passos no Supabase
-1. Criar um projeto em [Supabase](https://supabase.com/).
-2. Copiar `Project URL` e `anon public key` em Settings → API.
-3. Preencher `.env` com `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
-4. No SQL Editor, executar `supabase/schema.sql`.
-5. Em Authentication → Users → Invite user, criar o usuário administrador.
-6. Publicar imagens no bucket `site-media`.
+1. Crie o projeto no Supabase.
+2. Rode o arquivo `supabase-schema.sql` no SQL Editor.
+3. Convide o usuário admin em Authentication -> Users -> Invite user.
+4. Ajuste os dados iniciais no painel administrativo.
 
-## Regras implementadas
-- Site público com home, paróquia, comunidades, notícias, horários, links, pastorais e contato.
-- Login administrativo com `supabase.auth.signInWithPassword()`.
-- Substituição do `handleLogin()` fake por autenticação real do Supabase.
-- Área administrativa com CRUD para conteúdos principais.
-- Estrutura preparada para RLS e auditoria com `created_by`.
-- Sem persistência manual em storage; apenas a sessão mínima do Supabase.
+## Observações
 
-## Observação
-O projeto foi montado para reaproveitar o protótipo do front enviado, usando a paleta da marca:
-- Azul principal: `#3d7f91`
-- Dourado: `#c19241`
-- Azul claro: `#a4bac5`
-- Dourado claro: `#dfc79f`
-- Fundo creme: `#f7f3e9`
+- A sessão do admin está configurada para expirar após 30 minutos de inatividade.
+- A interface pública segue o layout do protótipo `modelo_demo.html`, com a paleta da marca da paróquia.

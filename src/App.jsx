@@ -1,43 +1,55 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { PublicLayout } from './layouts/PublicLayout'
-import { AdminLayout } from './layouts/AdminLayout'
-import { HomePage } from './pages/public/HomePage'
-import { ContentPage } from './pages/public/ContentPage'
-import { AdminLoginPage } from './pages/admin/AdminLoginPage'
-import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
-import { AdminCrudPage } from './pages/admin/AdminCrudPage'
-import { useAuth } from './hooks/useAuth'
-import { adminCrudConfig } from './data/adminCrudConfig'
+import { Navigate, Route, Routes } from 'react-router-dom';
+import PublicLayout from '@/layouts/PublicLayout';
+import AdminLayout from '@/layouts/AdminLayout';
+import AuthLayout from '@/layouts/AuthLayout';
+import RequireAuth from '@/components/RequireAuth';
+import HomePage from '@/pages/public/HomePage';
+import ParishPage from '@/pages/public/ParishPage';
+import CommunitiesPage from '@/pages/public/CommunitiesPage';
+import CommunityDetailPage from '@/pages/public/CommunityDetailPage';
+import NewsPage from '@/pages/public/NewsPage';
+import NewsDetailPage from '@/pages/public/NewsDetailPage';
+import SchedulesPage from '@/pages/public/SchedulesPage';
+import LinksPage from '@/pages/public/LinksPage';
+import PastoralsPage from '@/pages/public/PastoralsPage';
+import ContactPage from '@/pages/public/ContactPage';
+import NotFoundPage from '@/pages/public/NotFoundPage';
+import AdminLoginPage from '@/pages/admin/AdminLoginPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import AdminCollectionPage from '@/pages/admin/AdminCollectionPage';
+import { collectionDefinitions } from '@/config/collections';
 
 export default function App() {
-  const auth = useAuth()
-
   return (
     <Routes>
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/paroquia" element={<ContentPage eyebrow="Paróquia" title="História, clero e identidade" description="Base institucional da matriz e do site público." section="paroquia" />} />
-        <Route path="/comunidades" element={<ContentPage eyebrow="Comunidades" title="Rede viva de fé" description="Estrutura pública preparada para páginas individuais por slug." section="comunidades" />} />
-        <Route path="/noticias" element={<ContentPage eyebrow="Notícias" title="Atualizações da paróquia" description="Listagem cronológica com destaque da notícia mais recente." section="noticias" />} />
-        <Route path="/horarios" element={<ContentPage eyebrow="Horários" title="Missas e atendimento" description="Estrutura para mudanças frequentes com edição simples no painel." section="horarios" />} />
-        <Route path="/pastorais" element={<ContentPage eyebrow="Pastorais" title="Serviço e evangelização" description="Cards administráveis e preparados para expansão futura." section="pastorais" />} />
-        <Route path="/contato" element={<ContentPage eyebrow="Contato" title="Atendimento paroquial" description="Canais oficiais e páginas institucionais de apoio." section="contato" />} />
+        <Route index element={<HomePage />} />
+        <Route path="paroquia" element={<ParishPage />} />
+        <Route path="paroquia/historia" element={<Navigate to="/paroquia" replace />} />
+        <Route path="paroquia/clero" element={<Navigate to="/paroquia" replace />} />
+        <Route path="comunidades" element={<CommunitiesPage />} />
+        <Route path="comunidades/:slug" element={<CommunityDetailPage />} />
+        <Route path="noticias" element={<NewsPage />} />
+        <Route path="noticias/:slug" element={<NewsDetailPage />} />
+        <Route path="horarios" element={<SchedulesPage />} />
+        <Route path="links" element={<LinksPage />} />
+        <Route path="pastorais" element={<PastoralsPage />} />
+        <Route path="contato" element={<ContactPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
 
-      <Route path="/admin/login" element={<AdminLoginPage auth={auth} />} />
-      <Route path="/admin" element={<AdminLayout user={auth.user} onLogout={auth.logout} />}>
-        <Route index element={<AdminDashboardPage />} />
-        <Route path="comunidades" element={<AdminCrudPage config={adminCrudConfig.communities} userId={auth.user?.id} />} />
-        <Route path="noticias" element={<AdminCrudPage config={adminCrudConfig.news} userId={auth.user?.id} />} />
-        <Route path="clero" element={<AdminCrudPage config={adminCrudConfig.clergy} userId={auth.user?.id} />} />
-        <Route path="horarios" element={<AdminCrudPage config={adminCrudConfig.mass_schedules} userId={auth.user?.id} />} />
-        <Route path="secretaria" element={<AdminCrudPage config={adminCrudConfig.office_hours} userId={auth.user?.id} />} />
-        <Route path="links" element={<AdminCrudPage config={adminCrudConfig.useful_links} userId={auth.user?.id} />} />
-        <Route path="pastorais" element={<AdminCrudPage config={adminCrudConfig.pastorals} userId={auth.user?.id} />} />
-        <Route path="configuracoes" element={<AdminCrudPage config={adminCrudConfig.parish_profile} userId={auth.user?.id} />} />
+      <Route element={<AuthLayout />}>
+        <Route path="admin/login" element={<AdminLoginPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<AdminLayout />}>
+          <Route path="admin" element={<AdminDashboardPage />} />
+          {collectionDefinitions.map((definition) => (
+            <Route key={definition.key} path={`admin/${definition.key}`} element={<AdminCollectionPage collectionKey={definition.key} />} />
+          ))}
+        </Route>
+      </Route>
     </Routes>
-  )
+  );
 }

@@ -1,35 +1,62 @@
-import { Outlet, Navigate } from 'react-router-dom'
-import { AdminNavLink, Container } from '../components/ui'
-import { adminNavItems } from '../data/adminCrudConfig'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
+import Logo from '@/components/Logo';
+import Container from '@/components/Container';
+import Icon from '@/components/Icon';
+import { adminQuickLinks } from '@/config/collections';
+import { useAuth } from '@/context/AuthContext';
+import { useIdleLogout } from '@/hooks/useIdleLogout';
+import Button from '@/components/Button';
 
-export function AdminLayout({ user, onLogout }) {
-  if (!user) return <Navigate to="/admin/login" replace />
+export default function AdminLayout() {
+  const { user, signOut, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleTimeout = useCallback(async () => {
+    await signOut();
+    navigate('/admin/login', { replace: true, state: { reason: 'inactivity' } });
+  }, [navigate, signOut]);
+
+  useIdleLogout(handleTimeout, isAuthenticated, 30 * 60 * 1000);
 
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <div>
-          <p className="admin-sidebar__eyebrow">Painel paroquial</p>
-          <h2>Administração</h2>
+        <Logo variant="vertical" className="admin-brand" />
+        <div className="admin-userbox">
+          <strong>Área Administrativa</strong>
+          <span>{user?.email || 'Sessão autenticada'}</span>
         </div>
-        <nav className="admin-nav">
-          {adminNavItems.map((item) => (
-            <AdminNavLink key={item.to} to={item.to}>{item.label}</AdminNavLink>
+
+        <nav className="admin-nav" aria-label="Menu do painel">
+          <NavLink to="/admin" end className={({ isActive }) => (isActive ? 'admin-nav-link active' : 'admin-nav-link')}>
+            <Icon name="home" size={16} /> Dashboard
+          </NavLink>
+          {adminQuickLinks.map((item) => (
+            <NavLink key={item.key} to={`/admin/${item.key}`} className={({ isActive }) => (isActive ? 'admin-nav-link active' : 'admin-nav-link')}>
+              <Icon name="layers" size={16} /> {item.label}
+            </NavLink>
           ))}
         </nav>
-        <button className="btn btn-secondary" onClick={onLogout}>Sair</button>
       </aside>
-      <section className="admin-content">
-        <Container>
-          <div className="admin-topbar">
+
+      <div className="admin-main">
+        <header className="admin-topbar">
+          <Container className="admin-topbar-inner">
             <div>
-              <span className="eyebrow">Usuário autenticado</span>
-              <h1>{user.email}</h1>
+              <p className="section-eyebrow">Painel administrativo</p>
+              <h1 className="admin-title">Cadastros e publicação</h1>
             </div>
-          </div>
+            <Button variant="ghost" onClick={() => signOut()}>
+              <Icon name="logout" size={16} /> Sair
+            </Button>
+          </Container>
+        </header>
+
+        <Container className="admin-content">
           <Outlet />
         </Container>
-      </section>
+      </div>
     </div>
-  )
+  );
 }
