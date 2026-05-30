@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+public/
+.cache/
+.vite/
+*.log
+env.local
+/.turbo
