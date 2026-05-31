@@ -5,14 +5,14 @@ import Logo from '@components/Logo'
 
 export default function Login() {
   const { signIn } = useAuth()
-  const navigate   = useNavigate()
-  const location   = useLocation()
-  const from       = location.state?.from?.pathname || '/admin'
+  const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from?.pathname || '/admin'
 
-  const [email,    setEmail]    = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error,    setError]    = useState('')
-  const [loading,  setLoading]  = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -22,11 +22,7 @@ export default function Login() {
       await signIn(email, password)
       navigate(from, { replace: true })
     } catch (err) {
-      if (err?.code === 'NOT_ADMIN') {
-        setError('Sua conta autenticou, mas não tem permissão para acessar a área administrativa.')
-      } else {
-        setError('E-mail ou senha inválidos. Verifique suas credenciais.')
-      }
+      setError('E-mail ou senha inválidos. Verifique suas credenciais.')
     } finally {
       setLoading(false)
     }
@@ -37,14 +33,18 @@ export default function Login() {
       minHeight: '100vh', background: 'var(--cream-dark)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem'
     }}>
+
       <div style={{ width: '100%', maxWidth: 400 }}>
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <Logo size={60} style={{ margin: '0 auto 16px' }} />
-          <p style={{ fontSize: 11, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: 4 }}>
-            Paróquia Nossa Senhora das Graças
-          </p>
-          <h1 style={{ fontFamily: 'var(--font-serif)', color: 'var(--teal-xdark)', fontSize: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.0rem' }}>
+          <img
+            src="/img/logo-nsgracas-vertical.png"
+            alt="Paróquia Nossa Senhora das Graças"
+            style={{ width: 'clamp(133px, 18.75vw, 196px)', height: 'auto', objectFit: 'contain' }}
+          />
+        </div>
+        <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', color: 'var(--teal-xdark)', fontSize: '1.2rem' }}>
             Área Administrativa
           </h1>
         </div>
