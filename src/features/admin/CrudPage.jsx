@@ -28,6 +28,16 @@ export default function CrudPage({
   const [saving,  setSaving]  = useState(false)
   const { reorder } = useCrudOperations(table)
 
+  useEffect(() => {
+    const handleMenuClick = () => {
+      setEditing(null)
+      setDeleting(null)
+    }
+
+    window.addEventListener('admin-menu-click', handleMenuClick)
+    return () => window.removeEventListener('admin-menu-click', handleMenuClick)
+  }, [])
+
   const fetchItems = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -99,8 +109,10 @@ export default function CrudPage({
       }
       setEditing(null)
       await fetchItems()
+      return true
     } catch (e) {
       toast.error('Erro ao salvar: ' + (e?.message || String(e)))
+      return false
     } finally {
       setSaving(false)
     }

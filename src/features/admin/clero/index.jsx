@@ -26,18 +26,28 @@ const ROLE_LABELS = {
 function CleroForm({ item, onSave, onCancel, saving }) {
   const [imageFile, setImageFile] = useState(null)
   const [imageError, setImageError] = useState('')
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: item ?? { is_current: true, list_order: 0, photo_url: '' }
   })
-  const imageUrl = item?.photo_url || ''
+  const imageUrl = watch('photo_url') || item?.photo_url || ''
 
   const submit = async (values) => {
     try {
       setImageError('')
       let uploaded = values.photo_url || ''
-      if (imageFile) uploaded = await uploadMedia(imageFile, 'clergy')
-      await onSave({ ...values, photo_url: uploaded })
+      if (imageFile) {
+        uploaded = await uploadMedia(imageFile, 'clergy')
+        setValue('photo_url', uploaded)
+      } else if (typeof values.photo_url === 'string' && (values.photo_url.startsWith('blob:') || values.photo_url.startsWith('data:image/'))) {
+        uploaded = await uploadMedia(values.photo_url, 'clergy')
+        setValue('photo_url', uploaded)
+      }
+
+      const payload = { ...values, photo_url: uploaded }
+      delete payload.reg_code
+
+      await onSave(payload)
     } catch (err) {
       setImageError(err?.message || 'Erro ao enviar a foto do clero.')
     }
@@ -87,7 +97,18 @@ function CleroForm({ item, onSave, onCancel, saving }) {
         </div>
         <div className="form-group">
           <label className="form-label">Código de registro</label>
-          <input {...register('reg_code')} type="number" className="form-input" readOnly />
+          <input
+            {...register('reg_code', {
+              setValueAs: (value) => {
+                if (value === '' || value == null) return undefined
+                const parsed = Number(value)
+                return Number.isNaN(parsed) ? undefined : parsed
+              },
+            })}
+            type="number"
+            className="form-input"
+            readOnly
+          />
         </div>
       </div>
 

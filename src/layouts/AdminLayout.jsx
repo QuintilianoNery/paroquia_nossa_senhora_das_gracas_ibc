@@ -19,6 +19,10 @@ export default function AdminLayout() {
   const navigate          = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
 
+  const handleMenuClick = () => {
+    window.dispatchEvent(new Event('admin-menu-click'))
+  }
+
   const handleSignOut = async () => {
     await signOut()
     navigate('/admin/login')
@@ -50,6 +54,7 @@ export default function AdminLayout() {
               key={to}
               to={to}
               end={end}
+              onClick={handleMenuClick}
               style={({ isActive }) => ({
                 display: 'flex', alignItems: 'center', gap: 12,
                 padding: '10px 16px', textDecoration: 'none', fontSize: 13, fontWeight: 700,

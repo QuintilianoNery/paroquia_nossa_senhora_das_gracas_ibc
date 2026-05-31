@@ -13,8 +13,6 @@ const schema = z.object({
   history:         z.string().optional(),
   address:         z.string().optional(),
   google_maps_url: z.string().url('URL inválida').optional().or(z.literal('')),
-  latitude:        z.string().optional(),
-  longitude:       z.string().optional(),
   is_published:    z.boolean().default(true),
   manual_order:    z.coerce.number().default(0),
   image_url:       z.string().optional(),
@@ -31,7 +29,7 @@ function ComunidadeForm({ item, onSave, onCancel, saving }) {
       google_maps_url: item.google_maps_url ?? '',
     } : { is_published: true, manual_order: 0, image_url: '' }
   })
-  const imageUrl = watch('image_url')
+  const imageUrl = watch('image_url') || item?.image_url || ''
 
   const name = watch('name')
   const autoSlug = () => {
@@ -42,13 +40,20 @@ function ComunidadeForm({ item, onSave, onCancel, saving }) {
     try {
       setImageError('')
       let uploaded = values.image_url || ''
-      if (imageFile) uploaded = await uploadMedia(imageFile, 'communities')
+      if (imageFile) {
+        uploaded = await uploadMedia(imageFile, 'communities')
+        setValue('image_url', uploaded)
+      } else if (typeof values.image_url === 'string' && (values.image_url.startsWith('blob:') || values.image_url.startsWith('data:image/'))) {
+        uploaded = await uploadMedia(values.image_url, 'communities')
+        setValue('image_url', uploaded)
+      }
 
       const payload = { ...values }
       if (uploaded) payload.image_url = uploaded
       else delete payload.image_url
 
-      await onSave(payload)
+      const saved = await onSave(payload)
+      if (saved) onCancel()
     } catch (err) {
       setImageError(err?.message || 'Erro ao enviar a imagem da comunidade.')
     }
@@ -77,17 +82,6 @@ function ComunidadeForm({ item, onSave, onCancel, saving }) {
       <div className="form-group">
         <label className="form-label">Endereço</label>
         <input {...register('address')} className="form-input" placeholder="Rua, número, bairro, cidade/ES" />
-      </div>
-
-      <div className="form-row">
-        <div className="form-group">
-          <label className="form-label">Latitude</label>
-          <input {...register('latitude')} className="form-input" placeholder="-20.8413..." />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Longitude</label>
-          <input {...register('longitude')} className="form-input" placeholder="-41.1134..." />
-        </div>
       </div>
 
       <div className="form-group">
