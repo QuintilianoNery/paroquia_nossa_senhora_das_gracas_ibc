@@ -3,6 +3,10 @@
         "/^npm install$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^npm install -D vitest jsdom @testing-library/react$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }

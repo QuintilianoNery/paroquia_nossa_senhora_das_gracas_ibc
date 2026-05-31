@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { supabase } from '@lib/supabase'
+import { useSupabaseQuery } from '@lib/hooks/useSupabaseQuery'
+import { toast } from '@lib/toast'
 
 const COLORS = ['#3d7f91','#2a5f6e','#c19241','#96711e','#4a6170','#1a3e49']
 
@@ -14,15 +15,13 @@ const PLACEHOLDER = [
 ]
 
 export default function Comunidades() {
-  const [items,   setItems]   = useState([])
-  const [loading, setLoading] = useState(true)
+  const { data: items = [], loading, error } = useSupabaseQuery('communities', { filters: { is_published: true }, orderBy: 'manual_order' })
 
   useEffect(() => {
-    supabase.from('communities').select('*').eq('is_published', true).order('manual_order')
-      .then(({ data }) => { if (data) setItems(data); setLoading(false) })
-  }, [])
+    if (error) toast.error('Erro ao carregar comunidades')
+  }, [error])
 
-  const list = (!loading && items.length) ? items : PLACEHOLDER
+  const list = (!loading && items && items.length) ? items : PLACEHOLDER
 
   return (
     <>

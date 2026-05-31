@@ -22,7 +22,11 @@ export default function Login() {
       await signIn(email, password)
       navigate(from, { replace: true })
     } catch (err) {
-      setError('E-mail ou senha inválidos. Verifique suas credenciais.')
+      if (err?.code === 'NOT_ADMIN') {
+        setError('Sua conta autenticou, mas não tem permissão para acessar a área administrativa.')
+      } else {
+        setError('E-mail ou senha inválidos. Verifique suas credenciais.')
+      }
     } finally {
       setLoading(false)
     }

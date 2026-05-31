@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@lib/supabase'
+import { toast } from '@lib/toast'
+import { useCrudOperations } from '@lib/hooks/useCrudOperations'
 
 /**
  * CrudPage — componente genérico de listagem + CRUD para o painel admin.
@@ -24,6 +26,7 @@ export default function CrudPage({
   const [editing, setEditing] = useState(null)   // null = list, 'new' = criar, item = editar
   const [deleting,setDeleting]= useState(null)   // item a excluir
   const [saving,  setSaving]  = useState(false)
+  const { reorder } = useCrudOperations(table)
 
   const fetchItems = useCallback(async () => {
     setLoading(true)
@@ -97,7 +100,7 @@ export default function CrudPage({
       await fetchItems()
       setEditing(null)
     } catch (e) {
-      alert('Erro ao salvar: ' + e.message)
+      toast.error('Erro ao salvar: ' + (e?.message || String(e)))
     } finally {
       setSaving(false)
     }
@@ -106,24 +109,28 @@ export default function CrudPage({
   const handleDelete = async () => {
     if (!deleting) return
     setSaving(true)
-    const { error } = await supabase.from(table).delete().eq('id', deleting.id)
-    if (error) alert('Erro ao excluir: ' + error.message)
-    else { await fetchItems(); setDeleting(null) }
-    setSaving(false)
+    try {
+      const { error } = await supabase.from(table).delete().eq('id', deleting.id)
+      if (error) throw error
+      await fetchItems()
+      setDeleting(null)
+      toast.success('Registro excluído')
+    } catch (err) {
+      toast.error('Erro ao excluir: ' + (err?.message || String(err)))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleReorder = async (item, direction) => {
-    const idx     = items.findIndex(i => i.id === item.id)
-    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
-    if (swapIdx < 0 || swapIdx >= items.length) return
-    const other = items[swapIdx]
-    const orderField = orderBy || 'created_at'
-    const aOrder = item[orderField]
-    const bOrder = other[orderField]
-    // update both rows swapping the order field dynamically
-    await supabase.from(table).update({ [orderField]: bOrder }).eq('id', item.id)
-    await supabase.from(table).update({ [orderField]: aOrder }).eq('id', other.id)
-    fetchItems()
+    try {
+      const orderField = reorderField || orderBy || 'created_at'
+      const changed = await reorder({ items, item, direction, orderField })
+      if (!changed) return
+      await fetchItems()
+    } catch (err) {
+      toast.error('Erro ao reordenar: ' + (err?.message || String(err)))
+    }
   }
 
   // ── Form view ──────────────────────────────────────────

@@ -15,7 +15,7 @@ export default function Footer() {
               <img
                 src="/img/logo-horizontal-bege.png"
                 alt="Paróquia Nossa Senhora das Graças"
-                style={{ width: 'clamp(184px, 20.8vw, 272px)', height: 'auto', display: 'block', flexShrink: 0, objectFit: 'contain' }}
+                style={{ width: 'clamp(118px, 13.3vw, 174px)', height: 'auto', display: 'block', flexShrink: 0, objectFit: 'contain' }}
               />
             </div>
             <p style={{ fontSize: 14, lineHeight: 1.75, marginTop: 0, marginBottom: 18, maxWidth: 280 }}>

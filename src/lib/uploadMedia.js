@@ -2,6 +2,7 @@ import { supabase } from '@lib/supabase'
 
 const DEFAULT_BUCKET = 'site-images'
 const ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
 const MIME_BY_EXTENSION = {
   png: 'image/png',
   jpg: 'image/jpeg',
@@ -31,6 +32,10 @@ export async function uploadMedia(file, folder = 'general') {
   const contentType = getContentType(file)
   if (!ALLOWED_MIME_TYPES.has(contentType)) {
     throw new Error('Formato inválido. Use PNG, JPEG ou WEBP.')
+  }
+
+  if (file.size && file.size > MAX_FILE_SIZE_BYTES) {
+    throw new Error('Arquivo muito grande. Máx 5MB.')
   }
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, '_')

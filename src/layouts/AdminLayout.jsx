@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@features/auth/AuthContext'
-import Logo from '@components/Logo'
 
 const MENU = [
   { to: '/admin',              icon: 'ti-dashboard',       label: 'Dashboard',   end: true },
@@ -10,6 +9,7 @@ const MENU = [
   { to: '/admin/comunidades',  icon: 'ti-map-pin',         label: 'Comunidades' },
   { to: '/admin/noticias',     icon: 'ti-news',            label: 'Notícias' },
   { to: '/admin/horarios',     icon: 'ti-clock',           label: 'Horários' },
+  { to: '/admin/usuarios',     icon: 'ti-users',           label: 'Usuários' },
   { to: '/admin/links',        icon: 'ti-link',            label: 'Links' },
   { to: '/admin/pastorais',    icon: 'ti-heart',           label: 'Pastorais' },
 ]
@@ -35,13 +35,12 @@ export default function AdminLayout() {
       }}>
         {/* Brand */}
         <div style={{ padding: '1.25rem 1rem', borderBottom: '1px solid rgba(255,255,255,.1)', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Logo size={36} />
-          {!collapsed && (
-            <div>
-              <span style={{ display: 'block', fontSize: 9, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.4)' }}>Paróquia</span>
-              <span style={{ display: 'block', fontFamily: 'var(--font-serif)', color: '#fff', fontSize: 13, lineHeight: 1.2 }}>NSG · Admin</span>
-            </div>
-          )}
+          <img
+            src="/img/logo-horizontal-bege.png"
+            alt="Paróquia Nossa Senhora das Graças"
+            style={{ height: 43.2, width: 'auto', display: 'block', flexShrink: 0, objectFit: 'contain' }}
+          />
+          {/* brand text removed per request */}
         </div>
 
         {/* Nav */}
@@ -93,13 +92,15 @@ export default function AdminLayout() {
           background: '#fff', borderBottom: '1px solid var(--border)',
           padding: '0 1.5rem', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between'
         }}>
-          <button
-            onClick={() => setCollapsed(c => !c)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 20 }}
-            aria-label="Recolher menu"
-          >
-            <i className="ti ti-layout-sidebar" aria-hidden="true"></i>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+              onClick={() => setCollapsed(c => !c)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 20 }}
+              aria-label="Recolher menu"
+            >
+              <i className="ti ti-layout-sidebar" aria-hidden="true"></i>
+            </button>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <Link to="/" target="_blank" style={{ fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
               <i className="ti ti-external-link" style={{ fontSize: 14 }} aria-hidden="true"></i>

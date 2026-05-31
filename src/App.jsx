@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
+import ErrorBoundary from '@components/ErrorBoundary'
 
 import PublicLayout   from '@layouts/PublicLayout'
 import AdminLayout    from '@layouts/AdminLayout'
@@ -24,6 +25,7 @@ const AdminClero     = lazy(() => import('@features/admin/clero'))
 const AdminComuns    = lazy(() => import('@features/admin/comunidades'))
 const AdminNoticias  = lazy(() => import('@features/admin/noticias'))
 const AdminHorarios  = lazy(() => import('@features/admin/horarios'))
+const AdminUsuarios  = lazy(() => import('@features/admin/usuarios'))
 const AdminLinksPage = lazy(() => import('@features/admin/links').then(m => ({ default: m.AdminLinks })))
 const AdminPastorais = lazy(() => import('@features/admin/links').then(m => ({ default: m.AdminPastorais })))
 
@@ -35,8 +37,9 @@ const Spinner = () => (
 
 export default function App() {
   return (
-    <Suspense fallback={<Spinner />}>
-      <Routes>
+    <ErrorBoundary>
+      <Suspense fallback={<Spinner />}>
+        <Routes>
         {/* ── Public ── */}
         <Route element={<PublicLayout />}>
           <Route index         element={<Home />} />
@@ -65,12 +68,14 @@ export default function App() {
           <Route path="comunidades" element={<AdminComuns />} />
           <Route path="noticias"  element={<AdminNoticias />} />
           <Route path="horarios"  element={<AdminHorarios />} />
+          <Route path="usuarios"  element={<AdminUsuarios />} />
           <Route path="links"     element={<AdminLinksPage />} />
           <Route path="pastorais" element={<AdminPastorais />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   )
 }
