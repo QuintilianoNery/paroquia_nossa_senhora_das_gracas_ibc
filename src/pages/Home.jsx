@@ -12,13 +12,6 @@ function Hero() {
       minHeight: 560, display: 'flex', alignItems: 'center',
       position: 'relative', overflow: 'hidden'
     }} aria-label="Bem-vindo à paróquia">
-      {/* Decorative cross */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', right: '6%', top: '50%', transform: 'translateY(-50%)',
-        width: 200, height: 280, opacity: .06,
-        background: 'linear-gradient(#fff,#fff) center/20px 100% no-repeat, linear-gradient(#fff,#fff) center/100% 20px no-repeat'
-      }} />
-
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '5rem 2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center', width: '100%' }}>
         <div>
           <p style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 700, marginBottom: 14 }}>
@@ -144,19 +137,43 @@ function Destaques() {
 }
 
 // ── Notícias ─────────────────────────────────────────────
+function normalizeNewsLinks(newsItem) {
+  const raw = newsItem?.news_links ?? newsItem?.links
+  let parsed = raw
+
+  if (typeof parsed === 'string') {
+    try {
+      parsed = JSON.parse(parsed)
+    } catch {
+      parsed = []
+    }
+  }
+
+  if (!Array.isArray(parsed)) return []
+  return parsed
+    .map((entry) => ({
+      description: String(entry?.description ?? entry?.descricao ?? entry?.name ?? entry?.title ?? '').trim(),
+      url: String(entry?.url ?? entry?.link ?? '').trim(),
+    }))
+    .filter((entry) => entry.url)
+}
+
 function NoticiaCard({ n, featured }) {
   const date = n.published_at ? format(new Date(n.published_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR }) : ''
+  const firstLink = normalizeNewsLinks(n)[0]
   if (featured) return (
-    <Link to="/noticias" style={{ textDecoration: 'none' }}>
+    <Link to="/noticias" style={{ textDecoration: 'none', display: 'block', gridColumn: '1 / -1' }}>
       <article style={{
-        gridColumn: '1/-1', background: '#fff', borderRadius: 10, overflow: 'hidden',
-        display: 'grid', gridTemplateColumns: '1.1fr 1fr', border: '1px solid var(--border)',
-        cursor: 'pointer', transition: 'box-shadow .2s'
+        background: '#fff', borderRadius: 10, overflow: 'hidden',
+        display: 'grid', gridTemplateColumns: '220px 1fr', border: '1px solid var(--border)',
+        cursor: 'pointer', transition: 'box-shadow .2s',
+        minHeight: 220,
+        height: 220,
       }}
         onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-lg)'}
         onMouseLeave={e => e.currentTarget.style.boxShadow = ''}
       >
-        <div style={{ background: 'linear-gradient(135deg, var(--teal-xdark), var(--teal))', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 280, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ background: 'linear-gradient(135deg, var(--teal-xdark), var(--teal))', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 220, height: '100%', position: 'relative', overflow: 'hidden' }}>
           {n.image_url ? (
             <img src={n.image_url} alt={n.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           ) : (
@@ -164,34 +181,48 @@ function NoticiaCard({ n, featured }) {
           )}
           <span style={{ position: 'absolute', top: 16, left: 16, background: 'var(--gold)', color: 'var(--teal-xdark)', fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', padding: '5px 12px', borderRadius: 3 }}>Em Destaque</span>
         </div>
-        <div style={{ padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--teal)', background: 'var(--teal-xlight)', padding: '3px 10px', borderRadius: 3, marginBottom: 14 }}>Notícia</span>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: 'var(--teal-xdark)', lineHeight: 1.3, marginBottom: 12 }}>{n.title}</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 20, lineHeight: 1.65 }}>{n.summary}</p>
-          <p style={{ fontSize: 12, color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ padding: '1rem 1.1rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
+          <span style={{ display: 'inline-flex', alignSelf: 'flex-start', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--teal)', background: 'var(--teal-xlight)', padding: '3px 10px', borderRadius: 3, marginBottom: 10 }}>NOVO</span>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.3rem', color: 'var(--teal-xdark)', lineHeight: 1.25, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.title}</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 10, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.summary}</p>
+          {firstLink && (
+            <p style={{ marginBottom: 8, fontSize: 13, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <strong style={{ color: 'var(--teal-xdark)' }}>Clique aqui:</strong>{' '}
+              <a
+                href={firstLink.url}
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: 'var(--teal)', fontWeight: 700, textDecoration: 'underline' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {firstLink.description || firstLink.url}
+              </a>
+            </p>
+          )}
+          <p style={{ fontSize: 12, color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 'auto' }}>
             <i className="ti ti-calendar" aria-hidden="true"></i>{date}
           </p>
         </div>
-        <style>{`@media(max-width:700px){article > div:first-child{min-height:180px!important}article{grid-template-columns:1fr!important}}`}</style>
+        <style>{`@media(max-width:700px){article{grid-template-columns:120px 1fr!important;min-height:120px!important;height:120px!important}article > div:first-child{width:120px!important}}`}</style>
       </article>
     </Link>
   )
   return (
     <Link to="/noticias" style={{ textDecoration: 'none' }}>
-      <article style={{ background: '#fff', borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden', cursor: 'pointer', transition: 'box-shadow .2s, transform .2s' }}
+      <article style={{ background: '#fff', borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden', cursor: 'pointer', transition: 'box-shadow .2s, transform .2s', display: 'flex' }}
         onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
         onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = '' }}
       >
-        <div style={{ height: 150, background: 'linear-gradient(135deg,var(--cream-dark),var(--border))', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <div style={{ width: 110, aspectRatio: '1 / 1', flexShrink: 0, background: 'linear-gradient(135deg,var(--cream-dark),var(--border))', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
           {n.image_url ? (
             <img src={n.image_url} alt={n.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           ) : (
             <i className="ti ti-news" style={{ fontSize: 48, color: 'var(--teal)', opacity: .25 }} aria-hidden="true"></i>
           )}
         </div>
-        <div style={{ padding: '1.25rem' }}>
-          <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.05rem', color: 'var(--teal-xdark)', lineHeight: 1.3, marginBottom: 8 }}>{n.title}</h4>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10 }}>{n.summary}</p>
+        <div style={{ padding: '1rem .95rem', minWidth: 0 }}>
+          <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.05rem', color: 'var(--teal-xdark)', lineHeight: 1.3, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.title}</h4>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.summary}</p>
           <p style={{ fontSize: 12, color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: 5 }}>
             <i className="ti ti-calendar" aria-hidden="true"></i>{date}
           </p>
@@ -213,7 +244,11 @@ function NewsSection() {
     { id: 2, title: 'Primeira Comunhão 2026 — inscrições abertas', summary: 'As inscrições estão abertas até 30 de junho na secretaria paroquial.', published_at: new Date().toISOString(), image_url: '' },
     { id: 3, title: 'Campanha da Pastoral da Criança', summary: 'Contribua com alimentos e materiais de higiene para as famílias atendidas.', published_at: new Date().toISOString(), image_url: '' },
   ]
-  const items = news.length ? news : placeholder
+  const items = [...news]
+  if (items.length < 3) {
+    const needed = 3 - items.length
+    items.push(...placeholder.slice(0, needed).map((p, idx) => ({ ...p, id: `placeholder-${idx + 1}` })))
+  }
 
   return (
     <section style={{ background: 'var(--cream)', padding: '5rem 2rem' }}>

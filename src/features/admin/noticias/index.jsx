@@ -1,6 +1,7 @@
 import CrudPage from '../CrudPage'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import slugify from 'slugify'
@@ -16,21 +17,52 @@ const schema = z.object({
   published_at: z.string().optional(),
   is_published: z.boolean().default(false),
   image_url:    z.string().optional(),
+  links:        z.array(z.object({
+    description: z.string().optional(),
+    url: z.string().url('URL inválida').optional().or(z.literal('')),
+  })).default([]),
 })
+
+function normalizeLinks(links) {
+  let parsed = links
+
+  if (typeof parsed === 'string') {
+    try {
+      parsed = JSON.parse(parsed)
+    } catch {
+      parsed = []
+    }
+  }
+
+  if (!Array.isArray(parsed)) return []
+  return parsed
+    .map((entry) => ({
+      description: String(entry?.description ?? entry?.descricao ?? entry?.name ?? entry?.title ?? '').trim(),
+      url: String(entry?.url ?? entry?.link ?? '').trim(),
+    }))
+    .filter((entry) => entry.url)
+}
 
 function NoticiaForm({ item, onSave, onCancel, saving }) {
   const [imageFile, setImageFile] = useState(null)
   const [imageError, setImageError] = useState('')
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+  const [linksError, setLinksError] = useState('')
+  const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: item ? {
       ...item,
       published_at: item.published_at ? format(new Date(item.published_at), "yyyy-MM-dd'T'HH:mm") : '',
+      links: normalizeLinks(item.links ?? item.news_links),
     } : {
       is_published: false,
       published_at: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       image_url: '',
+      links: [],
     }
+  })
+  const { fields: linkFields, append: appendLink, remove: removeLink } = useFieldArray({
+    control,
+    name: 'links',
   })
   const imageUrl = watch('image_url') || item?.image_url || ''
 
@@ -42,12 +74,16 @@ function NoticiaForm({ item, onSave, onCancel, saving }) {
   const submit = async (values) => {
     try {
       setImageError('')
+      setLinksError('')
       let uploaded = values.image_url || ''
       if (imageFile) uploaded = await uploadMedia(imageFile, 'news')
 
       const payload = { ...values }
       if (uploaded) payload.image_url = uploaded
       else delete payload.image_url
+
+      payload.news_links = normalizeLinks(values.links)
+      delete payload.links
 
       await onSave(payload)
     } catch (err) {
@@ -89,6 +125,60 @@ function NoticiaForm({ item, onSave, onCancel, saving }) {
       />
       {imageError && <p className="form-error">{imageError}</p>}
       <input type="hidden" {...register('image_url')} />
+
+      <div className="form-group" style={{ marginTop: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <label className="form-label" style={{ margin: 0 }}>Links da notícia</label>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => appendLink({ description: '', url: '' })}
+            style={{ background: 'var(--cream)', color: 'var(--text)', padding: '6px 10px' }}
+          >
+            <i className="ti ti-plus"></i> Adicionar link
+          </button>
+        </div>
+
+        {linkFields.length === 0 && (
+          <p className="form-hint">Adicione links opcionais para mostrar na notícia como “Clique aqui: descrição”.</p>
+        )}
+
+        {linkFields.map((field, index) => (
+          <div key={field.id} className="card" style={{ marginBottom: 10 }}>
+            <div className="card-body" style={{ padding: '12px' }}>
+              <div className="form-group" style={{ marginBottom: 10 }}>
+                <label className="form-label">Descrição do link</label>
+                <input
+                  {...register(`links.${index}.description`)}
+                  className="form-input"
+                  placeholder="Ex: Formulário de inscrição"
+                />
+              </div>
+              <div className="form-row" style={{ alignItems: 'flex-end' }}>
+                <div className="form-group" style={{ marginBottom: 0, flex: 1 }}>
+                  <label className="form-label">Link (URL)</label>
+                  <input
+                    {...register(`links.${index}.url`)}
+                    className="form-input"
+                    placeholder="https://..."
+                  />
+                  {errors.links?.[index]?.url && <p className="form-error">{errors.links[index].url.message}</p>}
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => removeLink(index)}
+                  style={{ height: 38 }}
+                >
+                  Remover
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {linksError && <p className="form-error">{linksError}</p>}
+      </div>
 
       <div className="form-row">
         <div className="form-group">

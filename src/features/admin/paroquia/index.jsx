@@ -81,17 +81,6 @@ export default function AdminParoquia() {
               <input {...register('address')} className="form-input" placeholder="Rua Domingos Alcino Dadalto, 114 — Jardim Itapemirim" />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Latitude</label>
-                <input {...register('latitude')} className="form-input" placeholder="-20.8413" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Longitude</label>
-                <input {...register('longitude')} className="form-input" placeholder="-41.1134" />
-              </div>
-            </div>
-
             <div className="form-group">
               <label className="form-label">Link Google Maps</label>
               <input {...register('google_maps_url')} className="form-input" placeholder="https://maps.google.com/..." />

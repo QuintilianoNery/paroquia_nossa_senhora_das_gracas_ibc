@@ -27,8 +27,18 @@ function CleroCard({ c, idx }) {
         background: `linear-gradient(135deg, ${AVATAR_COLORS[idx % 4]}, ${AVATAR_COLORS[(idx + 1) % 4]})`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         margin: '0 auto 16px', fontFamily: 'var(--font-serif)',
-        fontSize: '2rem', fontWeight: 700, color: '#fff'
-      }} aria-hidden="true">{initials}</div>
+        fontSize: '2rem', fontWeight: 700, color: '#fff', overflow: 'hidden', flexShrink: 0
+      }} aria-hidden="true">
+        {c.photo_url ? (
+          <img
+            src={c.photo_url}
+            alt={c.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        ) : (
+          <span>{initials}</span>
+        )}
+      </div>
       <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 6 }}>
         {c.is_current && <i className="ti ti-star-filled" style={{ fontSize: 10, marginRight: 3 }} aria-hidden="true"></i>}
         {ROLE_LABELS[c.role] ?? c.role}

@@ -40,6 +40,7 @@ supabase/migrations/004_clergy_order_and_rls.sql
 supabase/migrations/005_images_upload.sql
 supabase/migrations/006_fix_rls_admin.sql
 supabase/migrations/007_repair_news_image_and_storage.sql
+supabase/migrations/008_news_links_on_news.sql
 ```
 
 Se o projeto for novo, as migrations são idempotentes e podem ser executadas sem risco.

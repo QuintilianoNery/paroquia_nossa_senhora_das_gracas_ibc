@@ -79,6 +79,7 @@ create table if not exists public.news (
   slug          text unique not null,
   summary       text,
   content       text,
+  news_links    jsonb not null default '[]'::jsonb,
   is_published  boolean default false,
   published_at  timestamptz default now(),
   created_at    timestamptz default now(),

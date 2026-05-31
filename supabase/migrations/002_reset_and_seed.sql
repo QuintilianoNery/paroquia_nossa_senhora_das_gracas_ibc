@@ -93,6 +93,7 @@ create table public.news (
   summary       text,
   content       text,
   image_url     text,
+  news_links    jsonb not null default '[]'::jsonb,
   is_published  boolean default false,
   published_at  timestamptz default now(),
   created_at    timestamptz default now(),
