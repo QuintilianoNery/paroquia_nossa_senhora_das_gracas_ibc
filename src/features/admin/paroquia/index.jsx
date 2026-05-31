@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@lib/supabase'
 import { uploadMedia } from '@lib/uploadMedia'
 import ImageUploadField from '@components/ImageUploadField'
 
 export default function AdminParoquia() {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [success, setSuccess] = useState(false)
@@ -33,6 +35,7 @@ export default function AdminParoquia() {
       const { error } = await supabase.from('parish_profile').upsert({ id: 1, ...values, image_url })
       if (error) throw error
       setSuccess(true)
+      navigate('/admin')
     } catch (err) {
       setError(err?.message || 'Erro ao salvar a imagem da paróquia.')
     } finally {

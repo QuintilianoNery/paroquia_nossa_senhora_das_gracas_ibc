@@ -44,7 +44,12 @@ function NoticiaForm({ item, onSave, onCancel, saving }) {
       setImageError('')
       let uploaded = values.image_url || ''
       if (imageFile) uploaded = await uploadMedia(imageFile, 'news')
-      await onSave({ ...values, image_url: uploaded })
+
+      const payload = { ...values }
+      if (uploaded) payload.image_url = uploaded
+      else delete payload.image_url
+
+      await onSave(payload)
     } catch (err) {
       setImageError(err?.message || 'Erro ao enviar a imagem da notícia.')
     }

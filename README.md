@@ -32,16 +32,18 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### 3. Criar o banco de dados
 
-No Supabase Dashboard, vá em **SQL Editor** e cole o conteúdo de:
+No Supabase Dashboard, vá em **SQL Editor** e execute as migrations nesta ordem:
 
-```
+```text
 supabase/migrations/001_schema.sql
+supabase/migrations/004_clergy_order_and_rls.sql
+supabase/migrations/005_images_upload.sql
+supabase/migrations/006_fix_rls_admin.sql
+supabase/migrations/007_repair_news_image_and_storage.sql
 ```
 
-Execute o script. Ele irá:
-- Criar todas as tabelas com os campos corretos
-- Configurar RLS (leitura pública + escrita autenticada)
-- Inserir dados iniciais de exemplo
+Se o projeto for novo, as migrations são idempotentes e podem ser executadas sem risco.
+Se você já estiver com erro de `image_url` ou `Bucket not found`, execute pelo menos a `007_repair_news_image_and_storage.sql`.
 
 ---
 

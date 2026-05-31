@@ -97,8 +97,8 @@ export default function CrudPage({
         const { error } = await supabase.from(table).update(values).eq('id', editing.id)
         if (error) throw error
       }
-      await fetchItems()
       setEditing(null)
+      await fetchItems()
     } catch (e) {
       toast.error('Erro ao salvar: ' + (e?.message || String(e)))
     } finally {

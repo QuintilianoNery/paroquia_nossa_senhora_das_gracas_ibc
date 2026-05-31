@@ -49,7 +49,12 @@ export async function uploadMedia(file, folder = 'general') {
       contentType,
     })
 
-  if (uploadError) throw uploadError
+  if (uploadError) {
+    if (uploadError?.message?.includes('Bucket not found')) {
+      throw new Error('Bucket de imagens não encontrado no Supabase. Execute a migration 007 para criar o bucket site-images.')
+    }
+    throw uploadError
+  }
 
   const { data } = supabase.storage.from(DEFAULT_BUCKET).getPublicUrl(path)
   return data.publicUrl

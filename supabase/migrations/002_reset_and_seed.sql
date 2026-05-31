@@ -23,6 +23,7 @@ create table public.parish_profile (
   id              int primary key default 1,
   title           text,
   content         text,
+  image_url       text,
   address         text,
   google_maps_url text,
   latitude        text,
@@ -45,6 +46,7 @@ create table public.communities (
   name            text not null,
   slug            text unique not null,
   history         text,
+  image_url       text,
   address         text,
   google_maps_url text,
   latitude        text,
@@ -90,6 +92,7 @@ create table public.news (
   slug          text unique not null,
   summary       text,
   content       text,
+  image_url     text,
   is_published  boolean default false,
   published_at  timestamptz default now(),
   created_at    timestamptz default now(),
@@ -266,5 +269,34 @@ on conflict (slug) do nothing;
 insert into public.news_gallery (news_id, url, caption) 
 select id, 'https://picsum.photos/seed/noticia1/1200/800', 'Imagem da notícia de teste' from public.news where slug = 'noticia-teste'
 on conflict do nothing;
+
+-- Storage bucket/policies para upload de imagens
+insert into storage.buckets (id, name, public)
+values ('site-images', 'site-images', true)
+on conflict (id) do update
+set public = excluded.public,
+    name = excluded.name;
+
+drop policy if exists "Public read site images" on storage.objects;
+drop policy if exists "Authenticated upload site images" on storage.objects;
+drop policy if exists "Authenticated update site images" on storage.objects;
+drop policy if exists "Authenticated delete site images" on storage.objects;
+
+create policy "Public read site images"
+  on storage.objects for select
+  using (bucket_id = 'site-images');
+
+create policy "Authenticated upload site images"
+  on storage.objects for insert
+  with check (bucket_id = 'site-images' and auth.role() = 'authenticated');
+
+create policy "Authenticated update site images"
+  on storage.objects for update
+  using (bucket_id = 'site-images' and auth.role() = 'authenticated')
+  with check (bucket_id = 'site-images' and auth.role() = 'authenticated');
+
+create policy "Authenticated delete site images"
+  on storage.objects for delete
+  using (bucket_id = 'site-images' and auth.role() = 'authenticated');
 
 -- Fim do script
