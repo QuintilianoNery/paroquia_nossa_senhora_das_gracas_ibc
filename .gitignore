@@ -1,6 +1,23 @@
-node_modules
+# Dependências
+node_modules/
+
+# Build
 /dist
+
+# Variáveis de ambiente
 .env
+.env.local
+.env.*.local
+
+# Sistema
 .DS_Store
+Thumbs.db
+
+# Testes
 coverage
+
+# Outros
 modelo_demo.html
+
+# Vite
+.vite/
