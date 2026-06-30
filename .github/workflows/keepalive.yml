@@ -10,18 +10,24 @@ on:
 jobs:
   keepalive:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - name: Instalar dependências
-        run: npm ci
+      - name: Instalar dependências (só produção — basta @supabase/supabase-js)
+        run: npm ci --omit=dev
 
       - name: Rodar keep-alive (inclusão + exclusão)
         run: node scripts/keepalive.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Avisar se falhar (Supabase pode pausar!)
+        if: failure()
+        run: echo "::warning::Keep-alive falhou — verifique os secrets e a tabela 'keepalive' no Supabase."
