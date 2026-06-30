@@ -16,7 +16,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Node 22+ tem WebSocket nativo, exigido pelo @supabase/supabase-js
+          # (realtime-js). Com Node 20 o createClient lança erro na inicialização.
+          node-version: 22
           cache: npm
 
       - name: Instalar dependências (só produção — basta @supabase/supabase-js)
